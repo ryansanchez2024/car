@@ -1,10 +1,78 @@
+#include "ArducamLink.h"
+#include "Arducam_Mega.h"
+#include "SPI.h"
+
+const int MEGA_CS = 7;
+Arducam_Mega myCAM(MEGA_CS);
+ArducamLink myUart;
+
+unsigned long lastCaptureTime = 0;
+const unsigned long captureInterval = 10000; // 10 seconds in milliseconds
+
+// Function declarations
+void captureAndSendImage();
+
+void setup()
+{
+    Serial.begin(115200);  // Initialize serial for debugging
+    SPI.begin();
+    myUart.arducamUartBegin(115200);
+    myUart.send_data_pack(7, "Hello Arduino UNO!");
+    myCAM.begin();
+    myUart.send_data_pack(8, "Mega start!");
+    Serial.println("Setup complete");
+}
+
+void loop()
+{
+    unsigned long currentTime = millis();
+
+    if (currentTime - lastCaptureTime >= captureInterval) {
+        captureAndSendImage();
+        lastCaptureTime = currentTime;
+    }
+    myCAM.captureThread();
+}
+
+void captureAndSendImage()
+{
+    myCAM.takePicture(CAM_IMAGE_MODE_UXGA, CAM_IMAGE_PIX_FMT_JPG);
+
+    // Send start marker
+    myUart.arducamUartWrite(0xFF);
+    myUart.arducamUartWrite(0xAA);
+    myUart.arducamUartWrite(0x01);
+    Serial.println("Start marker sent");
+
+    // Send image size
+    uint32_t imageSize = myCAM.getTotalLength();
+    myUart.arducamUartWrite((uint8_t)(imageSize & 0xFF));
+    myUart.arducamUartWrite((uint8_t)((imageSize >> 8) & 0xFF));
+    myUart.arducamUartWrite((uint8_t)((imageSize >> 16) & 0xFF));
+    myUart.arducamUartWrite((uint8_t)((imageSize >> 24) & 0xFF));
+    Serial.print("Image size: ");
+    Serial.println(imageSize);
+
+    // Send image data
+    uint8_t buffer[256];
+    while (imageSize > 0) {
+        uint16_t bytesToRead = min(256, imageSize);
+        myCAM.readBuff(buffer, bytesToRead);
+        myUart.arducamUartWriteBuff(buffer, bytesToRead);
+        imageSize -= bytesToRead;
+    }
+
+    // Send end marker
+    myUart.arducamUartWrite(0xFF);
+    myUart.arducamUartWrite(0xBB);
+    Serial.println("End marker sent");
+}
 
 
 
 
 
-
-// ==================================================================================================
+// // ==================================================================================================
 
 
 
