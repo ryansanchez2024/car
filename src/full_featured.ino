@@ -40,9 +40,7 @@ WiFiServer server(80);
 void setup() {
   Serial.begin(115200);
   SPI.begin();
-  myUart.arducamUartBegin(115200);
-  myCAM.begin();
-  pinMode(LED_BUILTIN, OUTPUT);
+  
 
   // Check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -60,6 +58,10 @@ void setup() {
 
   server.begin();
   printWifiStatus();
+
+  myUart.arducamUartBegin(115200);
+  myCAM.begin();
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
