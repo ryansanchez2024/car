@@ -1,25 +1,4 @@
 /*
-  WiFi Web Server LED Blink
-
-  A simple web server that lets you blink an LED via the web.
-  This sketch will print the IP address of your WiFi module (once connected)
-  to the Serial Monitor. From there, you can open that address in a web browser
-  to turn on and off the LED_BUILTIN.
-
-  If the IP address of your board is yourAddress:
-  http://yourAddress/H turns the LED on
-  http://yourAddress/L turns it off
-
-  This example is written for a network using WPA encryption. For
-  WEP or WPA, change the WiFi.begin() call accordingly.
-
-  Circuit:
-  * Board with NINA module (Arduino MKR WiFi 1010, MKR VIDOR 4000 and Uno WiFi Rev.2)
-  * LED attached to pin 9
-
-  created 25 Nov 2012
-  by Tom Igoe
-
   Find the full UNO R4 WiFi Network documentation here:
   https://docs.arduino.cc/tutorials/uno-r4-wifi/wifi-examples#simple-webserver
  */
@@ -53,14 +32,14 @@ void setup() {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
     status = WiFi.begin(ssid, pass);
-    delay(10000);
+    delay(2000);
   }
 
   server.begin();
   printWifiStatus();
 
-  myUart.arducamUartBegin(115200);
-  myCAM.begin();
+  // myUart.arducamUartBegin(115200);
+  // myCAM.begin();
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
@@ -68,7 +47,6 @@ void loop() {
   WiFiClient client = server.available();
 
   if (client) {
-    Serial.println("New client");
     String currentLine = "";
     String request = "";
 
@@ -76,6 +54,7 @@ void loop() {
       if (client.available()) {
         char c = client.read();
         request += c;
+        Serial.print(c);  // Print each character received
 
         if (c == '\n') {
           if (currentLine.length() == 0) {
@@ -105,8 +84,8 @@ void loop() {
     }
     // Close the connection
     client.stop();
-    Serial.println("Client disconnected");
   }
+  delay(1000);  // Add a small delay to avoid flooding the serial monitor
 }
 
 void captureAndSendImage(WiFiClient &client) {
@@ -150,7 +129,7 @@ void captureAndSendImage(WiFiClient &client) {
   myCAM.reset();
 }
 
-void sendHTMLResponse(WiFiClient &client, String message) {
+void sendHTMLResponse(WiFiClient &client, String message) {  
   client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: text/html");
   client.println("Connection: close");
