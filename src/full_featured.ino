@@ -38,8 +38,8 @@ void setup() {
   server.begin();
   printWifiStatus();
 
-  // myUart.arducamUartBegin(115200);
-  // myCAM.begin();
+  myUart.arducamUartBegin(115200);
+  myCAM.begin();
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
@@ -90,6 +90,7 @@ void loop() {
 
 void captureAndSendImage(WiFiClient &client) {
   // Capture image
+  Serial.println("Capturing image");
   myCAM.takePicture(CAM_IMAGE_MODE_VGA, CAM_IMAGE_PIX_FMT_JPG);
   uint32_t imgLen = myCAM.getTotalLength();
   Serial.print("Image Length: ");
