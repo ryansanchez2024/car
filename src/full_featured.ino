@@ -39,7 +39,7 @@ void setup() {
   printWifiStatus();
 
   myUart.arducamUartBegin(115200);
-  myCAM.begin();
+  // myCAM.begin();
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
